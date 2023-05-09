@@ -143,7 +143,11 @@ fn read_journeys(file_name: &str) -> Result<usize> {
 
 pub fn read_files() {
     println!("stations: {}", read_stations("stations.csv").unwrap());
+    /*
     println!("journeys: {}", read_journeys("2021-05.csv").unwrap());
     println!("journeys: {}", read_journeys("2021-06.csv").unwrap());
     println!("journeys: {}", read_journeys("2021-07.csv").unwrap());
+    */
+
+    println!("journeys: {}", read_journeys("journeys.csv").unwrap());
 }

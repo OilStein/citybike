@@ -1,11 +1,12 @@
+use scylla::{FromUserType, IntoUserType};
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, IntoUserType, FromUserType)]
 pub struct Station {
     #[serde(rename(deserialize = "FID"))]
-    fid: usize,
+    fid: i16,
     #[serde(rename(deserialize = "ID"))]
-    id: usize,
+    id: i16,
     #[serde(rename(deserialize = "Nimi"))]
     name_fi: String,
     #[serde(rename(deserialize = "Namn"))]
@@ -23,7 +24,7 @@ pub struct Station {
     #[serde(rename(deserialize = "Operaattor"))]
     operator: Option<String>,
     #[serde(rename(deserialize = "Kapasiteet"))]
-    capacity: usize,
+    capacity: i16,
     #[serde(rename(deserialize = "x"))]
     latitude: f32,
     #[serde(rename(deserialize = "y"))]
@@ -32,8 +33,8 @@ pub struct Station {
 
 impl Station {
     pub fn new(
-        fid: usize,
-        id: usize,
+        fid: i16,
+        id: i16,
         name_fi: String,
         name_swe: String,
         name_eng: String,
@@ -42,7 +43,7 @@ impl Station {
         city_fi: Option<String>,
         city_swe: Option<String>,
         operator: Option<String>,
-        capacity: usize,
+        capacity: i16,
         latitude: f32,
         longitude: f32,
     ) -> Station {
