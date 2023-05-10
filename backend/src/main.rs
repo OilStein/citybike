@@ -3,6 +3,8 @@ use std::time::Instant;
 use actix_web::{get, web::Data, App, HttpResponse, HttpServer, Responder};
 use backend::utils::csv_reader::read_files;
 use backend::{api::station_api::get_stations, prelude::*};
+use env_logger::Env;
+use log::info;
 use surrealdb::{engine::local::RocksDb, Surreal};
 
 #[tokio::main]
@@ -23,8 +25,8 @@ async fn main() -> Result<(), Error> {
     let data = Data::new(db);
 
     let end = Instant::now();
-    println!("Setting up duration: {:?}", (end - start));
-    println!("Starting server");
+    env_logger::init();
+    info!("Setting up duration: {:?}", (end - start));
 
     HttpServer::new(move || {
         App::new()

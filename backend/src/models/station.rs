@@ -7,31 +7,31 @@ use crate::utils::macros::map;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Station {
-    #[serde(rename = "FID")]
+    #[serde(rename(deserialize = "FID"))]
     fid: usize,
-    #[serde(rename = "ID")]
+    #[serde(rename(deserialize = "ID"))]
     id: usize,
-    #[serde(rename = "Nimi")]
+    #[serde(rename(deserialize = "Nimi"))]
     name_fi: String,
-    #[serde(rename = "Namn")]
+    #[serde(rename(deserialize = "Namn"))]
     name_swe: String,
-    #[serde(rename = "Name")]
+    #[serde(rename(deserialize = "Name"))]
     name_eng: String,
-    #[serde(rename = "Osoite")]
+    #[serde(rename(deserialize = "Osoite"))]
     address_fi: String,
-    #[serde(rename = "Adress")]
+    #[serde(rename(deserialize = "Adress"))]
     address_swe: String,
-    #[serde(rename = "Kaupunki")]
+    #[serde(rename(deserialize = "Kaupunki"))]
     city_fi: Option<String>,
-    #[serde(rename = "Stad")]
+    #[serde(rename(deserialize = "Stad"))]
     city_swe: Option<String>,
-    #[serde(rename = "Operaattor")]
+    #[serde(rename(deserialize = "Operaattor"))]
     operator: Option<String>,
-    #[serde(rename = "Kapasiteet")]
+    #[serde(rename(deserialize = "Kapasiteet"))]
     capacity: usize,
-    #[serde(rename = "x")]
+    #[serde(rename(deserialize = "x"))]
     latitude: f32,
-    #[serde(rename = "y")]
+    #[serde(rename(deserialize = "y"))]
     longitude: f32,
 }
 
