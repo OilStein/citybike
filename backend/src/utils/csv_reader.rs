@@ -127,7 +127,7 @@ async fn create_journey(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), 
     db.query(r#"BEGIN TRANSACTION"#).await?;
 
     for journey in journeys {
-        db.create("journey").content(journey).await?;
+        let _: Record = db.create("journey").content(journey).await?;
     }
 
     db.query(r#"COMMIT TRANSACTION"#).await?;

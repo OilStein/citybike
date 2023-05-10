@@ -1,7 +1,14 @@
-use chrono::prelude::*;
-use serde_derive::Serialize;
+use std::collections::BTreeMap;
 
-#[derive(Debug, Serialize)]
+use chrono::prelude::*;
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
+use surrealdb::sql::Datetime;
+use surrealdb::sql::Value;
+
+use crate::utils::macros::map;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Journey {
     departure: DateTime<Utc>,
     arrival: DateTime<Utc>,
@@ -52,3 +59,24 @@ impl Journey {
         true
     }
 }
+
+impl From<Journey> for Value {
+    fn from(val: Journey) -> Self {
+        let value: BTreeMap<String, Value> = map![
+            "departure".into() => val.departure.into(),
+            "arrival".into() => val.arrival.into(),
+            "dep_station_id".into() => val.dep_station_id.into(),
+            "dep_station_name".into() => val.dep_station_name.into(),
+            "tar_station_id".into() => val.tar_station_id.into(),
+            "tar_station_name".into() => val.tar_station_name.into(),
+            "distance".into() => val.distance.into(),
+            "duration".into() => val.duration.into(),
+        ]
+        .into();
+
+        Value::from(value)
+    }
+}
+
+pub trait Creatable: Into<Value> {}
+impl Creatable for Journey {}
