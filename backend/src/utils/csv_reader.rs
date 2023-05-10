@@ -45,8 +45,8 @@ struct Record {
     id: Thing,
 }
 
+/// TODO: Consider to move this fn to different file
 async fn create_station(db: &Surreal<Db>, station: Station) -> Result<(), Error> {
-    // let data: Object = W(station.into()).try_into()?;
     let _: Record = db.create("station").content(station).await?;
     Ok(())
 }
@@ -122,7 +122,7 @@ async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
 
     Ok(*count)
 }
-
+/// TODO: Consider to move to different file
 async fn create_journey(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), Error> {
     db.query(r#"BEGIN TRANSACTION"#).await?;
 
