@@ -1,6 +1,7 @@
 use chrono::prelude::*;
+use serde_derive::Serialize;
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Journey {
     departure: DateTime<Utc>,
     arrival: DateTime<Utc>,

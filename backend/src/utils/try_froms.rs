@@ -20,25 +20,6 @@ impl TryFrom<W<Value>> for Array {
         }
     }
 }
-impl TryFrom<W<Value>> for usize {
-    type Error = Error;
-    fn try_from(val: W<Value>) -> Result<usize, Error> {
-        match val.0 {
-            Value::Number(obj) => Ok(obj.as_usize()),
-            _ => Err(Error::XValueNotOfType("usize")),
-        }
-    }
-}
-impl TryFrom<W<Value>> for f64 {
-    type Error = Error;
-    fn try_from(val: W<Value>) -> Result<f64, Error> {
-        match val.0 {
-            Value::Number(obj) => Ok(obj.as_float()),
-            _ => Err(Error::XValueNotOfType("f64")),
-        }
-    }
-}
-
 impl TryFrom<W<Value>> for i64 {
     type Error = Error;
     fn try_from(val: W<Value>) -> Result<i64, Error> {

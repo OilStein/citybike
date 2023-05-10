@@ -1,19 +1,12 @@
 use crate::{
-    models::{
-        journey::Journey,
-        station::{Creatable, Station},
-    },
-    prelude::{Error, W},
+    models::{journey::Journey, station::Station},
+    prelude::Error,
 };
 use anyhow::Result;
 use chrono::DateTime;
 use serde::Deserialize;
 use std::{env::current_dir, path::PathBuf};
-use surrealdb::{
-    engine::local::Db,
-    sql::{Object, Value},
-    Surreal,
-};
+use surrealdb::{engine::local::Db, sql::Thing, Surreal};
 
 async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error> {
     let path: PathBuf = [
@@ -23,23 +16,6 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
     ]
     .iter()
     .collect();
-
-    /*
-        let mut rdr = csv::ReaderBuilder::new().from_path(path)?;
-
-        let mut stations: Vec<Station> = vec![];
-
-        for result in rdr.deserialize() {
-            let record: Station = match result {
-                Err(_err) => continue,
-                Ok(x) => x,
-            };
-
-            if record.validate() {
-                stations.push(record);
-            }
-        }
-    */
 
     let stations: Vec<Station> = csv::ReaderBuilder::new()
         .from_path(path)
@@ -55,7 +31,7 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
     db.query(r#"BEGIN TRANSACTION;"#).await?;
 
     for station in stations {
-        create(db, station).await?;
+        create_station(db, station).await?;
     }
 
     db.query(r#"COMMIT TRANSACTION;"#);
@@ -63,9 +39,15 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
     Ok(*count)
 }
 
-async fn create<T: Creatable>(db: &Surreal<Db>, station: T) -> Result<(), Error> {
-    let data: Object = W(station.into()).try_into()?;
-    db.create("station").content(Value::from(data)).await?;
+#[derive(Deserialize)]
+struct Record {
+    #[allow(dead_code)]
+    id: Thing,
+}
+
+async fn create_station(db: &Surreal<Db>, station: Station) -> Result<(), Error> {
+    // let data: Object = W(station.into()).try_into()?;
+    let _: Record = db.create("station").content(station).await?;
     Ok(())
 }
 
@@ -93,7 +75,7 @@ fn parse_date(s: &str) -> Result<DateTime<chrono::FixedOffset>, chrono::ParseErr
     DateTime::parse_from_rfc3339(format!("{}Z", s).as_str())
 }
 
-fn read_journeys(file_name: &str) -> Result<usize> {
+async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
     let path: PathBuf = [
         current_dir()?,
         "data".into(),
@@ -134,41 +116,22 @@ fn read_journeys(file_name: &str) -> Result<usize> {
         })
         .collect();
 
-    /*
-        let mut rdr = csv::ReaderBuilder::new().from_path(path)?;
+    let count = &journeys.len();
 
-        let mut journeys: Vec<Journey> = vec![];
+    create_journey(db, journeys).await?;
 
-        for result in rdr.deserialize() {
-            let csv_journey: CsvJourney = match result {
-                Err(_err) => continue,
-                Ok(x) => x,
-            };
-            // Date parse checking
-            let departure = match parse_date(&csv_journey.departure) {
-                Ok(dep) => dep,
-                Err(_e) => continue,
-            };
-            let arrival = match parse_date(&csv_journey.arrival) {
-                Ok(arr) => arr,
-                Err(_e) => continue,
-            };
-            let journey = Journey::new(
-                departure.into(),
-                arrival.into(),
-                csv_journey.dep_station_id,
-                csv_journey.dep_station_name,
-                csv_journey.tar_station_id,
-                csv_journey.tar_station_name,
-                csv_journey.distance,
-                csv_journey.duration,
-            );
-            if journey.validate() {
-                journeys.push(journey);
-            }
-        }
-    */
-    Ok(journeys.len())
+    Ok(*count)
+}
+
+async fn create_journey(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), Error> {
+    db.query(r#"BEGIN TRANSACTION"#).await?;
+
+    for journey in journeys {
+        db.create("journey").content(journey).await?;
+    }
+
+    db.query(r#"COMMIT TRANSACTION"#).await?;
+    Ok(())
 }
 
 pub async fn read_files(db: &Surreal<Db>) {
@@ -179,5 +142,8 @@ pub async fn read_files(db: &Surreal<Db>) {
     // println!("journeys: {}", read_journeys("2021-05.csv").unwrap());
     // println!("journeys: {}", read_journeys("2021-06.csv").unwrap());
     // println!("journeys: {}", read_journeys("2021-07.csv").unwrap());
-    println!("journeys: {}", read_journeys("journeys.csv").unwrap());
+    println!(
+        "journeys: {}",
+        read_journeys(db, "journeys.csv").await.unwrap()
+    );
 }

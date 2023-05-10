@@ -31,9 +31,9 @@ pub struct Station {
     #[serde(rename(deserialize = "Kapasiteet"))]
     capacity: usize,
     #[serde(rename(deserialize = "x"))]
-    latitude: f64,
+    latitude: f32,
     #[serde(rename(deserialize = "y"))]
-    longitude: f64,
+    longitude: f32,
 }
 
 impl Station {
@@ -49,8 +49,8 @@ impl Station {
         city_swe: Option<String>,
         operator: Option<String>,
         capacity: usize,
-        latitude: f64,
-        longitude: f64,
+        latitude: f32,
+        longitude: f32,
     ) -> Station {
         Station {
             fid,
