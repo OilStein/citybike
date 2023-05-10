@@ -7,7 +7,9 @@ use crate::controllers::station_controller::StationBMC;
 pub async fn get_stations(db: Data<Surreal<Db>>) -> HttpResponse {
     let result = StationBMC::get_all(db).await;
     match result {
-        Ok(stations) => HttpResponse::Ok().json(stations),
+        Ok(stations) => {
+            HttpResponse::Ok().json(serde_json::to_string(&stations).expect("error json"))
+        }
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }

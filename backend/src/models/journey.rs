@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use chrono::prelude::*;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use surrealdb::sql::Datetime;
 use surrealdb::sql::Value;
 
 use crate::utils::macros::map;

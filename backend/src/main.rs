@@ -7,6 +7,7 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+    delete_temp_db_file()?;
     let start = Instant::now();
 
     // reads datafiles and "bulk inserts" to database
@@ -14,10 +15,10 @@ async fn main() -> Result<(), Error> {
     let db = Surreal::new::<RocksDb>("temp.db").await?;
     db.use_ns("citybike").use_db("citybike").await?;
 
-    if !temp_db_files_exists() {
-        println!("Database didn't exists");
-        read_files(&db).await;
-    }
+    // if !temp_db_files_exists() {
+    //     println!("Database didn't exists");
+    read_files(&db).await;
+    // }
 
     let data = Data::new(db);
 
@@ -42,9 +43,18 @@ async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
 
-use std::path::Path;
+use std::fs;
 
-fn temp_db_files_exists() -> bool {
-    let path = Path::new("temp.db/CURRENT");
-    path.is_file()
+fn delete_temp_db_file() -> std::io::Result<()> {
+    if let Err(e) = fs::remove_dir_all("temp.db") {
+        if e.kind() == std::io::ErrorKind::NotFound {
+            println!("temp.db file does not exist.");
+        } else {
+            return Err(e);
+        }
+    } else {
+        println!("temp.db file has been deleted.");
+    }
+
+    Ok(())
 }
