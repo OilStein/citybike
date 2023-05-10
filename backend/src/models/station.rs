@@ -1,38 +1,37 @@
 use std::collections::BTreeMap;
 
-use serde::Deserialize;
-use serde_derive::Serialize;
+use serde::{Deserialize, Serialize};
 use surrealdb::sql::Value;
 
 use crate::utils::macros::map;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Station {
-    #[serde(rename(deserialize = "FID"))]
+    #[serde(rename = "FID")]
     fid: usize,
-    #[serde(rename(deserialize = "ID"))]
+    #[serde(rename = "ID")]
     id: usize,
-    #[serde(rename(deserialize = "Nimi"))]
+    #[serde(rename = "Nimi")]
     name_fi: String,
-    #[serde(rename(deserialize = "Namn"))]
+    #[serde(rename = "Namn")]
     name_swe: String,
-    #[serde(rename(deserialize = "Name"))]
+    #[serde(rename = "Name")]
     name_eng: String,
-    #[serde(rename(deserialize = "Osoite"))]
+    #[serde(rename = "Osoite")]
     address_fi: String,
-    #[serde(rename(deserialize = "Adress"))]
+    #[serde(rename = "Adress")]
     address_swe: String,
-    #[serde(rename(deserialize = "Kaupunki"))]
+    #[serde(rename = "Kaupunki")]
     city_fi: Option<String>,
-    #[serde(rename(deserialize = "Stad"))]
+    #[serde(rename = "Stad")]
     city_swe: Option<String>,
-    #[serde(rename(deserialize = "Operaattor"))]
+    #[serde(rename = "Operaattor")]
     operator: Option<String>,
-    #[serde(rename(deserialize = "Kapasiteet"))]
+    #[serde(rename = "Kapasiteet")]
     capacity: usize,
-    #[serde(rename(deserialize = "x"))]
+    #[serde(rename = "x")]
     latitude: f32,
-    #[serde(rename(deserialize = "y"))]
+    #[serde(rename = "y")]
     longitude: f32,
 }
 

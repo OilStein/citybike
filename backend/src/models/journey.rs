@@ -1,8 +1,7 @@
 use std::collections::BTreeMap;
 
 use chrono::prelude::*;
-use serde_derive::Deserialize;
-use serde_derive::Serialize;
+use serde::{Deserialize, Serialize};
 use surrealdb::sql::Value;
 
 use crate::utils::macros::map;
