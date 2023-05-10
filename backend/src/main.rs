@@ -7,11 +7,12 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 async fn main() -> surrealdb::Result<()> {
     let start = Instant::now();
 
+    // If temp.db exists uses that one, otherwise creates a new
     let db = Surreal::new::<RocksDb>("temp.db").await?;
-    db.use_ns("test").use_db("test").await?;
+    db.use_ns("citybike").use_db("citybike").await?;
 
     // reads stations
-    read_files();
+    read_files(&db).await;
 
     let end = Instant::now();
 

@@ -1,6 +1,12 @@
-use serde::Deserialize;
+use std::collections::BTreeMap;
 
-#[derive(Deserialize)]
+use serde::Deserialize;
+use serde_derive::Serialize;
+use surrealdb::sql::Value;
+
+use crate::utils::macros::map;
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Station {
     #[serde(rename(deserialize = "FID"))]
     fid: usize,
@@ -9,9 +15,9 @@ pub struct Station {
     #[serde(rename(deserialize = "Nimi"))]
     name_fi: String,
     #[serde(rename(deserialize = "Namn"))]
-    name_eng: String,
-    #[serde(rename(deserialize = "Name"))]
     name_swe: String,
+    #[serde(rename(deserialize = "Name"))]
+    name_eng: String,
     #[serde(rename(deserialize = "Osoite"))]
     address_fi: String,
     #[serde(rename(deserialize = "Adress"))]
@@ -71,5 +77,35 @@ impl Station {
             return true;
         }
         false
+    }
+}
+
+impl From<Station> for Value {
+    fn from(val: Station) -> Self {
+        let mut value: BTreeMap<String, Value> = map![
+            "fid".into() => val.fid.into(),
+            "id".into() => val.id.into(),
+            "name_fi".into() => val.name_fi.into(),
+            "name_eng".into() => val.name_eng.into(),
+            "name_swe".into() => val.name_swe.into(),
+            "address_fi".into() => val.address_fi.into(),
+            "address_swe".into() => val.address_swe.into(),
+            "capacity".into() => val.capacity.into(),
+            "latitude".into() => val.latitude.into(),
+            "longitude".into() => val.longitude.into(),
+        ]
+        .into();
+
+        if let Some(cfi) = val.city_fi {
+            value.insert("city_fi".into(), cfi.into());
+        }
+        if let Some(cswe) = val.city_swe {
+            value.insert("city_swe".into(), cswe.into());
+        }
+        if let Some(oper) = val.operator {
+            value.insert("operator".into(), oper.into());
+        }
+
+        Value::from(value)
     }
 }

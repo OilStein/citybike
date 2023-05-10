@@ -1,10 +1,18 @@
-use crate::models::{journey::Journey, station::Station};
+use crate::{
+    models::{journey::Journey, station::Station},
+    prelude::{Error, W},
+};
 use anyhow::Result;
 use chrono::DateTime;
 use serde::Deserialize;
 use std::{env::current_dir, path::PathBuf};
+use surrealdb::{
+    engine::local::Db,
+    sql::{Object, Value},
+    Surreal,
+};
 
-fn read_stations(file_name: &str) -> Result<usize> {
+async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error> {
     let path: PathBuf = [
         current_dir()?,
         "data".into(),
@@ -30,13 +38,26 @@ fn read_stations(file_name: &str) -> Result<usize> {
         }
     */
     let stations: Vec<Station> = csv::ReaderBuilder::new()
-        .from_path(path)?
+        .from_path(path)
+        .expect("Bad error hendling")
         .deserialize::<Station>()
         .filter_map(Result::ok)
         .filter(Station::validate)
         .collect();
 
-    Ok(stations.len())
+    let count = &stations.len();
+
+    // Transaction
+    db.query(r#"BEGIN TRANSACTION;"#).await?;
+
+    for station in stations {
+        let data: Object = W(station.into()).try_into()?;
+        db.create("station").content(Value::from(data)).await?;
+    }
+
+    db.query(r#"COMMIT TRANSACTION;"#);
+
+    Ok(*count)
 }
 
 #[derive(Deserialize, Debug)]
@@ -141,9 +162,13 @@ fn read_journeys(file_name: &str) -> Result<usize> {
     Ok(journeys.len())
 }
 
-pub fn read_files() {
-    println!("stations: {}", read_stations("stations.csv").unwrap());
-    println!("journeys: {}", read_journeys("2021-05.csv").unwrap());
-    println!("journeys: {}", read_journeys("2021-06.csv").unwrap());
-    println!("journeys: {}", read_journeys("2021-07.csv").unwrap());
+pub async fn read_files(db: &Surreal<Db>) {
+    println!(
+        "stations: {}",
+        read_stations(db, "stations.csv").await.unwrap()
+    );
+    // println!("journeys: {}", read_journeys("2021-05.csv").unwrap());
+    // println!("journeys: {}", read_journeys("2021-06.csv").unwrap());
+    // println!("journeys: {}", read_journeys("2021-07.csv").unwrap());
+    println!("journeys: {}", read_journeys("journeys.csv").unwrap());
 }
