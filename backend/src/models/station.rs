@@ -31,9 +31,9 @@ pub struct Station {
     #[serde(rename(deserialize = "Kapasiteet"))]
     capacity: usize,
     #[serde(rename(deserialize = "x"))]
-    latitude: f32,
+    latitude: f64,
     #[serde(rename(deserialize = "y"))]
-    longitude: f32,
+    longitude: f64,
 }
 
 impl Station {
@@ -49,8 +49,8 @@ impl Station {
         city_swe: Option<String>,
         operator: Option<String>,
         capacity: usize,
-        latitude: f32,
-        longitude: f32,
+        latitude: f64,
+        longitude: f64,
     ) -> Station {
         Station {
             fid,
@@ -109,3 +109,6 @@ impl From<Station> for Value {
         Value::from(value)
     }
 }
+
+pub trait Creatable: Into<Value> {}
+impl Creatable for Station {}

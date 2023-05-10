@@ -1,5 +1,8 @@
 use crate::{
-    models::{journey::Journey, station::Station},
+    models::{
+        journey::Journey,
+        station::{Creatable, Station},
+    },
     prelude::{Error, W},
 };
 use anyhow::Result;
@@ -37,6 +40,7 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
             }
         }
     */
+
     let stations: Vec<Station> = csv::ReaderBuilder::new()
         .from_path(path)
         .expect("Bad error hendling")
@@ -51,13 +55,18 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
     db.query(r#"BEGIN TRANSACTION;"#).await?;
 
     for station in stations {
-        let data: Object = W(station.into()).try_into()?;
-        db.create("station").content(Value::from(data)).await?;
+        create(db, station).await?;
     }
 
     db.query(r#"COMMIT TRANSACTION;"#);
 
     Ok(*count)
+}
+
+async fn create<T: Creatable>(db: &Surreal<Db>, station: T) -> Result<(), Error> {
+    let data: Object = W(station.into()).try_into()?;
+    db.create("station").content(Value::from(data)).await?;
+    Ok(())
 }
 
 #[derive(Deserialize, Debug)]
