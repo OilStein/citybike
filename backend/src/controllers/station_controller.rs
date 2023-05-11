@@ -1,20 +1,23 @@
 use actix_web::web::Data;
-use surrealdb::{
-    engine::local::Db,
-    sql::{Array, Object, Value},
-    Surreal,
-};
+use surrealdb::{engine::local::Db, Surreal};
 
-use crate::{models::station::Station, prelude::*};
-
+use crate::{models::station::RecordStation, prelude::*};
 pub struct StationBMC;
 
 impl StationBMC {
-    pub async fn get_all(db: Data<Surreal<Db>>) -> Result<Vec<Object>, Error> {
+    pub async fn get_all_stations(db: Data<Surreal<Db>>) -> Result<Vec<RecordStation>, Error> {
         let mut response = db.query("SELECT * FROM station LIMIT 10").await?;
-        let stations: Vec<Station> = response.take(0)?;
-        let values: Vec<Value> = stations.into_iter().map(|x| Value::from(x)).collect();
-        let array: Array = Array::try_from(values).expect("sda");
-        array.into_iter().map(|x| W(x).try_into()).collect()
+        let stations: Vec<RecordStation> = response.take(0)?;
+        Ok(stations)
+    }
+
+    pub async fn get_station_by_id(
+        db: Data<Surreal<Db>>,
+        id: &str,
+    ) -> Result<RecordStation, Error> {
+        let mut response = db.query(format!("SELECT * FROM station:{}", id)).await?;
+        let station: Option<RecordStation> = response.take(0)?;
+        // TODO: Better error handling
+        Ok(station.unwrap())
     }
 }

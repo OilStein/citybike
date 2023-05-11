@@ -2,8 +2,10 @@ use std::time::Instant;
 
 use actix_web::{get, web::Data, App, HttpResponse, HttpServer, Responder};
 use backend::utils::csv_reader::read_files;
-use backend::{api::station_api::get_stations, prelude::*};
-use env_logger::Env;
+use backend::{
+    api::station_api::{get_all_stations, get_station_by_id},
+    prelude::*,
+};
 use log::info;
 use surrealdb::{engine::local::RocksDb, Surreal};
 
@@ -25,6 +27,8 @@ async fn main() -> Result<(), Error> {
     let data = Data::new(db);
 
     let end = Instant::now();
+
+    std::env::set_var("RUST_LOG", "debug");
     env_logger::init();
     info!("Setting up duration: {:?}", (end - start));
 
@@ -32,7 +36,8 @@ async fn main() -> Result<(), Error> {
         App::new()
             .app_data(data.clone())
             .service(hello)
-            .service(get_stations)
+            .service(get_all_stations)
+            .service(get_station_by_id)
     })
     .bind("localhost:8080")?
     .run()
