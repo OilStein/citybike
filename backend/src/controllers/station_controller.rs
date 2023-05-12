@@ -1,7 +1,7 @@
 use actix_web::web::Data;
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::{models::station::RecordStation, prelude::*};
+use crate::{error::MyError, models::station::RecordStation, prelude::*};
 pub struct StationBMC;
 
 impl StationBMC {
@@ -17,7 +17,15 @@ impl StationBMC {
     ) -> Result<RecordStation, Error> {
         let mut response = db.query(format!("SELECT * FROM station:{}", id)).await?;
         let station: Option<RecordStation> = response.take(0)?;
-        // TODO: Better error handling
-        Ok(station.unwrap())
+        match station {
+            Some(x) => {
+                return Ok(x);
+            }
+            None => {
+                return Err(Error::MyError(MyError::new(
+                    "Station not found by id".to_string(),
+                )));
+            } // Ok(station.unwrap())
+        }
     }
 }
