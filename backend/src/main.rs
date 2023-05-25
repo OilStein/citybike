@@ -1,9 +1,9 @@
 use std::time::Instant;
 
 use actix_web::{get, web::Data, App, HttpResponse, HttpServer, Responder};
-use backend::api::journey_api::*;
 use backend::utils::csv_reader::read_files;
 use backend::{
+    api::journey_api::{get_all_journeys, get_journey_by_id},
     api::station_api::{get_all_stations, get_station_by_id},
     prelude::*,
 };
@@ -12,7 +12,10 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    delete_temp_db_file()?;
+    let init = false;
+    if init {
+        delete_temp_db_file()?;
+    }
     let start = Instant::now();
 
     // reads datafiles and "bulk inserts" to database
@@ -20,10 +23,9 @@ async fn main() -> Result<(), Error> {
     let db = Surreal::new::<RocksDb>("temp.db").await?;
     db.use_ns("citybike").use_db("citybike").await?;
 
-    // if !temp_db_files_exists() {
-    //     println!("Database didn't exists");
-    read_files(&db).await;
-    // }
+    if init {
+        read_files(&db).await;
+    }
 
     let data = Data::new(db);
 

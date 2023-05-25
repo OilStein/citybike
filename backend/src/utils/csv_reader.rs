@@ -8,7 +8,9 @@ use serde::Deserialize;
 use std::{env::current_dir, path::PathBuf};
 use surrealdb::{engine::local::Db, sql::Thing, Surreal};
 
+/// Reads a file that contains station data. Sends that data to database.
 async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error> {
+    // For OS reasons
     let path: PathBuf = [
         current_dir()?,
         "data".into(),
@@ -27,14 +29,7 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
 
     let count = &stations.len();
 
-    // Transaction
-    db.query(r#"BEGIN TRANSACTION;"#).await?;
-
-    for station in stations {
-        create_station(db, station).await?;
-    }
-
-    db.query(r#"COMMIT TRANSACTION;"#);
+    send_stations_to_db(db, stations).await?;
 
     Ok(*count)
 }
@@ -46,13 +41,18 @@ struct Record {
 }
 
 /// TODO: Consider to move this fn to different file
-async fn create_station(db: &Surreal<Db>, station: Station) -> Result<(), Error> {
-    let _: Record = db.create("station").content(station).await?;
+async fn send_stations_to_db(db: &Surreal<Db>, stations: Vec<Station>) -> Result<(), Error> {
+    db.query(r#"BEGIN TRANSACTION;"#).await?;
+    for station in stations {
+        let _: Record = db.create("station").content(station).await?;
+    }
+    db.query(r#"COMMIT TRANSACTION;"#);
     Ok(())
 }
 
+/// Helper struct when deserializing csv file.
 #[derive(Deserialize, Debug)]
-pub struct CsvJourney {
+struct CsvJourney {
     #[serde(rename(deserialize = "Departure"))]
     departure: String,
     #[serde(rename(deserialize = "Return"))]
@@ -71,11 +71,15 @@ pub struct CsvJourney {
     duration: usize,
 }
 
+/// Parses string to chrono::DateTime
 fn parse_date(s: &str) -> Result<DateTime<chrono::FixedOffset>, chrono::ParseError> {
     DateTime::parse_from_rfc3339(format!("{}Z", s).as_str())
 }
 
+/// Reads a file that contains journey data. After reading rows to vector of journeys, vector is
+/// sent to database.
 async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
+    // for OS reasons
     let path: PathBuf = [
         current_dir()?,
         "data".into(),
@@ -84,6 +88,8 @@ async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
     .iter()
     .collect();
 
+    // TODO Consider to send data on 100k row vectors to database rather than in a whole vector.
+    // Might use lesser amount RAM when reading 1M rows and then sending whole vector.
     let journeys: Vec<Journey> = csv::ReaderBuilder::new()
         .from_path(path)?
         .deserialize::<CsvJourney>()
@@ -118,12 +124,13 @@ async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
 
     let count = &journeys.len();
 
-    create_journey(db, journeys).await?;
+    send_journeys_to_db(db, journeys).await?;
 
     Ok(*count)
 }
-/// TODO: Consider to move to different file
-async fn create_journey(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), Error> {
+/// Sends journey data to the database in a transaction block.
+/// TODO: Consider to move to different file.
+async fn send_journeys_to_db(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), Error> {
     db.query(r#"BEGIN TRANSACTION"#).await?;
 
     for journey in journeys {
@@ -134,6 +141,7 @@ async fn create_journey(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), 
     Ok(())
 }
 
+/// Initiliazes database with stations and journey that are read from csv files.
 pub async fn read_files(db: &Surreal<Db>) {
     println!(
         "stations: {}",
