@@ -1,7 +1,7 @@
 use actix_web::web::Data;
 use surrealdb::{engine::local::Db, Surreal};
 
-use crate::{error::MyError, models::station::RecordStation, prelude::*};
+use crate::{error::MyError, models::station::{RecordStation, SingleStationView}, prelude::*};
 pub struct StationBMC;
 
 impl StationBMC {
@@ -30,9 +30,9 @@ impl StationBMC {
     pub async fn get_station_by_id(
         db: Data<Surreal<Db>>,
         id: &str,
-    ) -> Result<RecordStation, Error> {
-        let mut response = db.query(format!("SELECT * FROM station:{}", id)).await?;
-        let station: Option<RecordStation> = response.take(0)?;
+    ) -> Result<SingleStationView, Error> {
+        let mut response = db.query(format!("SELECT *, array::pop((SELECT count(dep_station_id == $parent.fid) AS a FROM journey GROUP ALL).a) AS starting FROM station:{}", id)).await?;
+        let station: Option<SingleStationView> = response.take(0)?;
         match station {
             Some(x) => {
                 return Ok(x);

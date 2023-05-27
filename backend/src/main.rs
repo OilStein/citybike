@@ -1,6 +1,7 @@
 use std::time::Instant;
 
 use actix_web::{get, web::Data, App, HttpResponse, HttpServer, Responder};
+use backend::api::journey_api::get_journeys_page;
 use backend::api::station_api::get_stations_by_page;
 use backend::utils::csv_reader::read_files;
 use backend::{
@@ -45,6 +46,7 @@ async fn main() -> Result<(), Error> {
             .service(get_all_journeys)
             .service(get_journey_by_id)
             .service(get_stations_by_page)
+            .service(get_journeys_page)
     })
     .bind("localhost:8080")?
     .run()

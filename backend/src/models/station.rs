@@ -1,21 +1,32 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{Thing, Value};
+use surrealdb::sql::{Thing, Value, Number};
 
 use crate::utils::macros::map;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RecordStation {
     id: Thing,
-    fid: usize,
+    // fid: usize,
+    name_fi: String,
+    // address_fi: String,
+    //  city_fi: String,
+    // capacity: usize,
+    // latitude: f32,
+    // longitude: f32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SingleStationView {
+    id: Thing,
     name_fi: String,
     address_fi: String,
-    //  city_fi: String,
     capacity: usize,
     latitude: f32,
     longitude: f32,
-    //    start_count: usize,
+    starting: usize,
+    // ending: usize,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
