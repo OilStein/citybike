@@ -6,7 +6,23 @@ pub struct StationBMC;
 
 impl StationBMC {
     pub async fn get_all_stations(db: Data<Surreal<Db>>) -> Result<Vec<RecordStation>, Error> {
-        let mut response = db.query("SELECT * FROM station LIMIT 10").await?;
+        let mut response = db
+            .query("SELECT * FROM station ORDER BY name_fi ASC")
+            .await?;
+        let stations: Vec<RecordStation> = response.take(0)?;
+        Ok(stations)
+    }
+
+    pub async fn get_stations_page(
+        db: Data<Surreal<Db>>,
+        page: usize,
+    ) -> Result<Vec<RecordStation>, Error> {
+        let mut response = db
+            .query(format!(
+                "SELECT * FROM station ORDER BY name_fi ASC LIMIT 25 START {}",
+                (page * 25)
+            ))
+            .await?;
         let stations: Vec<RecordStation> = response.take(0)?;
         Ok(stations)
     }

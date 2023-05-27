@@ -15,6 +15,11 @@ pub async fn get_all_journeys(db: Data<Surreal<Db>>) -> HttpResponse {
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
+/*
+pub async fn get_journeys_page(db: Data<Surreal<Db>>) -> HttpResponse {
+    let response = JourneyBMC::get::get_
+}
+*/
 #[get("journeys/{id}")]
 pub async fn get_journey_by_id(db: Data<Surreal<Db>>, id: Path<String>) -> HttpResponse {
     let response = JourneyBMC::get_journey_by_id(db, &id.into_inner()).await;
