@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{Thing, Value, Number};
+use surrealdb::sql::{Thing, Value};
 
 use crate::utils::macros::map;
 
@@ -25,8 +25,15 @@ pub struct SingleStationView {
     capacity: usize,
     latitude: f32,
     longitude: f32,
+    data: StationData,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct StationData {
     starting: usize,
-    // ending: usize,
+    ending: usize,
+    // mean_start: f32,
+    // mean_end: f32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

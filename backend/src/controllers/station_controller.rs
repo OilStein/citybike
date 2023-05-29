@@ -31,7 +31,14 @@ impl StationBMC {
         db: Data<Surreal<Db>>,
         id: &str,
     ) -> Result<SingleStationView, Error> {
-        let mut response = db.query(format!("SELECT *, array::pop((SELECT count(dep_station_id == $parent.fid) AS a FROM journey GROUP ALL).a) AS starting FROM station:{}", id)).await?;
+        let mut response = db.query(
+            format!("SELECT *, 
+            array::pop(
+                (SELECT count(dep_station_id == $parent.fid) AS starting, 
+                        count(tar_station_id == $parent.fid) AS ending                      
+                        FROM journey GROUP ALL)) as data 
+                FROM station:{}", id))
+            .await?;
         let station: Option<SingleStationView> = response.take(0)?;
         match station {
             Some(x) => {
