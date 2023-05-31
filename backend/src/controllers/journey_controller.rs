@@ -13,15 +13,32 @@ impl JourneyBMC {
         Ok(journeys)
     }
 
-    pub async fn get_journeys_pagination(db: Data<Surreal<Db>>, page: usize, order: &str) -> Result<Vec<RecordJourney>, Error> {
-        let mut response = db.query(format!("SELECT * FROM journey ORDER BY {} ASC LIMIT 25 START {}", order , (page * 25))).await?;
+    pub async fn get_journeys_pagination(
+        db: Data<Surreal<Db>>,
+        page: usize,
+        order: &str,
+    ) -> Result<Vec<RecordJourney>, Error> {
+        let mut response = db
+            .query(format!(
+                "SELECT * FROM journey ORDER BY {} ASC LIMIT 25 START {}",
+                order,
+                (page * 25)
+            ))
+            .await?;
         let journeys: Vec<RecordJourney> = response.take(0)?;
         Ok(journeys)
-
     }
 
-    pub async fn get_journeys_search_by_stations(db: Data<Surreal<Db>>, query: &str) -> Result<Vec<RecordJourney>, Error> {
-        let mut response = db.query(format!("SELECT * FROM journey WHERE dep_station_name = /(?i){}/ LIMIT 5", query)).await?;
+    pub async fn get_journeys_search_by_stations(
+        db: Data<Surreal<Db>>,
+        query: &str,
+    ) -> Result<Vec<RecordJourney>, Error> {
+        let mut response = db
+            .query(format!(
+                "SELECT * FROM journey WHERE dep_station_name = /(?i){}/ LIMIT 5",
+                query
+            ))
+            .await?;
         let journeys: Vec<RecordJourney> = response.take(0)?;
         Ok(journeys)
     }
@@ -38,7 +55,9 @@ impl JourneyBMC {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RecordJourney {
     id: Thing,
+    dep_station_id: usize,
     dep_station_name: String,
+    tar_station_id: usize,
     tar_station_name: String,
     distance: usize,
     duration: usize,

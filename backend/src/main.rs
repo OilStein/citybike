@@ -1,12 +1,14 @@
 use std::time::Instant;
 
+use actix_cors::Cors;
+use actix_web::http;
 use actix_web::{get, web::Data, App, HttpResponse, HttpServer, Responder};
 use backend::api::journey_api::get_journeys_page;
 use backend::api::station_api::get_stations_by_page;
 use backend::utils::csv_reader::read_files;
 use backend::{
     api::journey_api::{get_all_journeys, get_journey_by_id},
-    api::station_api::{get_station_by_id},
+    api::station_api::get_station_by_id,
     prelude::*,
 };
 use log::info;
@@ -14,7 +16,7 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let init = false;
+    let init = true;
     if init {
         delete_temp_db_file()?;
     }
@@ -38,10 +40,17 @@ async fn main() -> Result<(), Error> {
     info!("Setting up duration: {:?}", (end - start));
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000")
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600);
         App::new()
+            .wrap(cors)
             .app_data(data.clone())
             .service(hello)
-           // .service(get_all_stations)
+            // .service(get_all_stations)
             .service(get_station_by_id)
             .service(get_all_journeys)
             .service(get_journey_by_id)
