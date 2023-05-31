@@ -9,7 +9,7 @@ use std::{env::current_dir, path::PathBuf};
 use surrealdb::{engine::local::Db, sql::Thing, Surreal};
 
 /// Reads a file that contains station data. Sends that data to database.
-async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error> {
+async fn read_stations(file_name: &str) -> Result<Vec<Station>, Error> {
     // For OS reasons
     let path: PathBuf = [
         current_dir()?,
@@ -27,11 +27,8 @@ async fn read_stations(db: &Surreal<Db>, file_name: &str) -> Result<usize, Error
         .filter(Station::validate)
         .collect();
 
-    let count = &stations.len();
 
-    send_stations_to_db(db, stations).await?;
-
-    Ok(*count)
+    Ok(stations)
 }
 
 #[derive(Deserialize)]
@@ -78,7 +75,7 @@ fn parse_date(s: &str) -> Result<DateTime<chrono::FixedOffset>, chrono::ParseErr
 
 /// Reads a file that contains journey data. After reading rows to vector of journeys, vector is
 /// sent to database.
-async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
+async fn read_journeys(file_name: &str) -> Result<Vec<Journey>, Error> {
     // for OS reasons
     let path: PathBuf = [
         current_dir()?,
@@ -91,7 +88,7 @@ async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
     // TODO Consider to send data on 100k row vectors to database rather than in a whole vector.
     // Might use lesser amount RAM when reading 1M rows and then sending whole vector.
     let journeys: Vec<Journey> = csv::ReaderBuilder::new()
-        .from_path(path)?
+        .from_path(path).expect("panic error")
         .deserialize::<CsvJourney>()
         .filter_map(Result::ok)
         .filter_map(|csv_journey| {
@@ -122,11 +119,7 @@ async fn read_journeys(db: &Surreal<Db>, file_name: &str) -> Result<usize> {
         })
         .collect();
 
-    let count = &journeys.len();
-
-    send_journeys_to_db(db, journeys).await?;
-
-    Ok(*count)
+        Ok(journeys)
 }
 /// Sends journey data to the database in a transaction block.
 /// TODO: Consider to move to different file.
@@ -142,16 +135,12 @@ async fn send_journeys_to_db(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result
 }
 
 /// Initiliazes database with stations and journey that are read from csv files.
-pub async fn read_files(db: &Surreal<Db>) {
-    println!(
-        "stations: {}",
-        read_stations(db, "stations.csv").await.unwrap()
-    );
+pub async fn read_files(db: &Surreal<Db>) -> Result<(), Error> {
+    send_stations_to_db(db, read_stations("stations.csv").await?).await?;
+    send_journeys_to_db(db, read_journeys("journeys.csv").await?).await?;
+     
     // println!("journeys: {}", read_journeys("2021-05.csv").unwrap());
     // println!("journeys: {}", read_journeys("2021-06.csv").unwrap());
     // println!("journeys: {}", read_journeys("2021-07.csv").unwrap());
-    println!(
-        "journeys: {}",
-        read_journeys(db, "journeys.csv").await.unwrap()
-    );
+    Ok(())
 }
