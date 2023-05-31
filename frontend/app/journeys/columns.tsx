@@ -11,16 +11,18 @@ export type Journey = {
     duration: number,
 }
 
-
-const kilometer = (m: number):number => {
+// converts meters to kilometers
+export const kilometer = (m: number):number => {
     return +(m / 1000).toFixed(1);
   }
 
-const minutes = (sec: number): number => {
-    let mins = sec % 60
+  // converts seconds to minutes, rounding up at trailing 30
+export const minutes = (sec: number): number => {
+    if(sec < 30) return 0
+    let mins = Math.floor(sec/60)
     let trailingSecs = sec - (mins * 60)
+    if (trailingSecs >= 30) return mins + 1
     if (mins <= 0) return 1;
-    if (trailingSecs > 30) return mins + 1
     return mins
   }
 
