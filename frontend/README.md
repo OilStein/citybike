@@ -26,6 +26,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ## Running tests
 
+```bash
+npm run test
+# or
+pnpm test
+```
 
 ## Learn More
 
