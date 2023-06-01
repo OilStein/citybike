@@ -16,10 +16,16 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
+
+    // ! true: inits whole database
+    // ! false: uses already initialized database
     let init = true;
+    
     if init {
         delete_temp_db_file()?;
     }
+    
+    // Times initialzation
     let start = Instant::now();
 
     // reads datafiles and "bulk inserts" to database
