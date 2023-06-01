@@ -17,8 +17,8 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 #[tokio::main]
 async fn main() -> Result<(), Error> {
 
-    // ! true: inits whole database
-    // ! false: uses already initialized database
+    // ! true: resets database
+    // ! false: uses already initialized database, make sure you have initialized database once
     let init = true;
     
     if init {
