@@ -28,7 +28,7 @@ async fn main() -> Result<(), Error> {
     db.use_ns("citybike").use_db("citybike").await?;
 
     if init {
-        read_files(&db).await;
+        read_files(&db).await?;
     }
 
     let data = Data::new(db);

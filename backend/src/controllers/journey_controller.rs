@@ -20,9 +20,9 @@ impl JourneyBMC {
     ) -> Result<Vec<RecordJourney>, Error> {
         let mut response = db
             .query(format!(
-                "SELECT * FROM journey ORDER BY {} ASC LIMIT 25 START {}",
+                "SELECT * FROM journey ORDER BY {} ASC LIMIT 10 START {}",
                 order,
-                (page * 25)
+                (page * 10)
             ))
             .await?;
         let journeys: Vec<RecordJourney> = response.take(0)?;
