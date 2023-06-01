@@ -19,8 +19,8 @@ impl StationBMC {
     ) -> Result<Vec<RecordStation>, Error> {
         let mut response = db
             .query(format!(
-                "SELECT * FROM station ORDER BY name_fi ASC LIMIT 25 START {}",
-                (page * 25)
+                "SELECT * FROM station ORDER BY name_fi ASC LIMIT 10 START {}",
+                (page * 10)
             ))
             .await?;
         let stations: Vec<RecordStation> = response.take(0)?;

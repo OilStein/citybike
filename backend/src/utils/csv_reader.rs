@@ -122,7 +122,7 @@ async fn read_journeys(file_name: &str) -> Result<Vec<Journey>, Error> {
         Ok(journeys)
 }
 /// Sends journey data to the database in a transaction block.
-/// TODO: Consider to move to different file.
+// TODO: Consider to move to different file.
 async fn send_journeys_to_db(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result<(), Error> {
     db.query(r#"BEGIN TRANSACTION"#).await?;
 
@@ -137,10 +137,16 @@ async fn send_journeys_to_db(db: &Surreal<Db>, journeys: Vec<Journey>) -> Result
 /// Initiliazes database with stations and journey that are read from csv files.
 pub async fn read_files(db: &Surreal<Db>) -> Result<(), Error> {
     send_stations_to_db(db, read_stations("stations.csv").await?).await?;
-    send_journeys_to_db(db, read_journeys("journeys.csv").await?).await?;
-     
-    // println!("journeys: {}", read_journeys("2021-05.csv").unwrap());
-    // println!("journeys: {}", read_journeys("2021-06.csv").unwrap());
-    // println!("journeys: {}", read_journeys("2021-07.csv").unwrap());
+   
+   // testdata
+   // send_journeys_to_db(db, read_journeys("journeys.csv").await?).await?;
+
+    // with all of these imported, duration: 48min
+    // specs: wsl2 ubuntu restricted to 2 cores and 4GB RAM
+    // TODO: journey page query failed
+    send_journeys_to_db(db, read_journeys("2021-05.csv").await?).await?;
+    send_journeys_to_db(db, read_journeys("2021-06.csv").await?).await?;
+    send_journeys_to_db(db, read_journeys("2021-07.csv").await?).await?;
+
     Ok(())
 }
