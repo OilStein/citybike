@@ -1,8 +1,8 @@
 # Citybike Backend
 
 ## Prequisites
-- [https://www.rust-lang.org/tools/install](Rust tools)
-- [https://clang.llvm.org/get_started.html](Clang) or [https://gcc.gnu.org/install/](gcc) - For RocksDB embedding
+- [Rust tools](https://www.rust-lang.org/tools/install)
+- [Clang](https://clang.llvm.org/get_started.html) or [gcc](https://gcc.gnu.org/install/) - For RocksDB embedding
 
 ## Datasets - Optional
 Project contains all stations data and 100 000 lines of journeys 
@@ -31,10 +31,10 @@ Written line should look like this, where "2021-07.csv" is the files name:
 
 To run backend:
 ```
-<sub>Unoptimized<sub>
+<sub>Unoptimized</sub>
 cargo run 
 or
-<sub>Optimized<sub>
+<sub>Optimized</sub>
 cargo run --release 
 ```
 

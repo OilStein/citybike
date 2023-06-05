@@ -1,20 +1,17 @@
 ## Getting Started
 
 ### Requipments
-- [https://nodejs.org/en](node) - Runtime
+- [Node](https://nodejs.org/en) - Runtime
 
-### Fast way
-Run the development server:
+### Running application
+Run the unoptimized development server:
 
 ```bash
 npm run dev
 # or
 pnpm dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-### Slow way
+or run optimized
 
 ```bash
 npm run build && npm run start
@@ -22,7 +19,7 @@ npm run build && npm run start
 pnpm build && pnpm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser.
+Open <http://localhost:3000> with your browser.
 
 ## Running tests
 
