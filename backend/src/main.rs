@@ -16,15 +16,14 @@ use surrealdb::{engine::local::RocksDb, Surreal};
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-
     // ! true: resets database
     // ! false: uses already initialized database, make sure you have initialized database once
     let init = true;
-    
+
     if init {
         delete_temp_db_file()?;
     }
-    
+
     // Times initialzation
     let start = Instant::now();
 
@@ -55,8 +54,6 @@ async fn main() -> Result<(), Error> {
         App::new()
             .wrap(cors)
             .app_data(data.clone())
-            .service(hello)
-            // .service(get_all_stations)
             .service(get_station_by_id)
             .service(get_all_journeys)
             .service(get_journey_by_id)
@@ -68,10 +65,6 @@ async fn main() -> Result<(), Error> {
     .await?;
 
     Ok(())
-}
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
 }
 
 use std::fs;
@@ -88,4 +81,23 @@ fn delete_temp_db_file() -> std::io::Result<()> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{http::StatusCode, test, App};
+
+    #[actix_rt::test]
+    async fn test_get_station_by_id() {
+        let db = Surreal::new::<RocksDb>("temp.db").await.unwrap();
+        let data = Data::new(db);
+        let mut app =
+            test::init_service(App::new().app_data(data).service(get_station_by_id)).await;
+        let req = test::TestRequest::get().uri("/stations/1").to_request();
+        let resp = test::call_service(&mut app, req).await;
+        assert_eq!(resp.status(), StatusCode::OK);
+        let body = test::read_body(resp).await;
+        assert!(body.contains("station_id"));
+    }
 }
